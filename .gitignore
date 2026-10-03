@@ -1,0 +1,9 @@
+/.venv
+/aruco_marker.py
+/img
+/led_config.json
+/markers
+/output
+/real_img
+/reference.png
+/__pycache__
