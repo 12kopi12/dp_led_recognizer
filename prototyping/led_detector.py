@@ -692,7 +692,7 @@ def main():
     parser.add_argument("--mode", type=str, choices=["annotate", "detect", "auto"], default="auto",
                         help="Režim: 'annotate' pro označení LED, 'detect' pro detekci ve složce img, 'auto' pro automatické spuštění")
     parser.add_argument("--ref", type=str, default="reference.png", help="Cesta k referenčnímu obrázku")
-    parser.add_argument("--config", type=str, default="led_config.json", help="Cesta k JSON souboru s konfigurací")
+    parser.add_argument("--config", type=str, default=".\img\led_config.json", help="Cesta k JSON souboru s konfigurací")
     parser.add_argument("--img_dir", type=str, default="img", help="Složka s testovacími obrázky")
     parser.add_argument("--generate", action="store_true", help="Vygenerovat syntetická testovací data (reference.png + img/*)")
     
@@ -700,7 +700,7 @@ def main():
     
     if args.generate:
         print("Generování syntetických testovacích dat...")
-        import generate_test_data
+        import prototyping.generate_test_data as generate_test_data
         board = generate_test_data.create_synthetic_board()
         ref_img = generate_test_data.draw_leds(board, True, True)
         cv2.imwrite("reference.png", ref_img)
@@ -732,7 +732,7 @@ def main():
         if not os.path.exists(args.config):
             if not os.path.exists(args.ref):
                 print(f"[INFO] Referenční obrázek '{args.ref}' nenalezen, generuji testovací data...")
-                import generate_test_data
+                import prototyping.generate_test_data as generate_test_data
                 board = generate_test_data.create_synthetic_board()
                 ref_img = generate_test_data.draw_leds(board, True, True)
                 cv2.imwrite("reference.png", ref_img)
