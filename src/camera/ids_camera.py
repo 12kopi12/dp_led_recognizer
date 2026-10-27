@@ -582,12 +582,13 @@ class IDSCamera(ICamera):
     def _start_acquisition(self) -> bool:
         """Configures data stream, allocates ring buffers, and starts capture."""
         try:
-            datastreams = self._device.DataStreams()
-            if not datastreams or len(datastreams) == 0:
-                logger.error("No DataStreams available on device.")
-                return False
+            if self._datastream is None:
+                datastreams = self._device.DataStreams()
+                if not datastreams or len(datastreams) == 0:
+                    logger.error("No DataStreams available on device.")
+                    return False
 
-            self._datastream = datastreams[0].OpenDataStream()
+                self._datastream = datastreams[0].OpenDataStream()
 
             # Retrieve required payload buffer size from nodemap
             payload_size = self._nodemap.FindNode("PayloadSize").Value()
@@ -650,7 +651,17 @@ class IDSCamera(ICamera):
 
             # 3. Stop data stream
             if self._datastream is not None:
-                self._datastream.StopAcquisition(peak.AcquisitionStopMode_Default)
+                try:
+                    is_grabbing = (
+                        self._datastream.IsGrabbing()
+                        if callable(getattr(self._datastream, "IsGrabbing", None))
+                        else self._is_acquiring
+                    )
+                except Exception:
+                    is_grabbing = self._is_acquiring
+
+                if is_grabbing:
+                    self._datastream.StopAcquisition(peak.AcquisitionStopMode_Default)
 
                 # 4. Flush and revoke all buffers
                 if hasattr(self._datastream, "FlushAndRevokeAllBuffers"):
